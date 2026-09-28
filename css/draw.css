@@ -276,3 +276,25 @@ button.button:disabled {
     transform: rotate(12deg);
   }
 }
+
+.feedback-panel {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(62, 78, 65, 0.18);
+  border-radius: 18px;
+  background: rgba(248, 246, 238, 0.72);
+}
+
+.feedback-panel h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-panel p {
+  margin: 0 0 0.75rem;
+  line-height: 1.8;
+}
+
+.feedback-panel .button {
+  margin-top: 0.25rem;
+}
