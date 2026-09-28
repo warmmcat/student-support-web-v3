@@ -108,6 +108,7 @@ async function drawHexagram() {
   resultCard.hidden = true;
 
   previousIndex = index;
+  window.StudentSupportStats?.recordDraw(hexagram);
   if (drawAnimation) {
     drawAnimation.hidden = false;
     window.requestAnimationFrame(() => drawAnimation.scrollIntoView({ behavior: 'smooth', block: 'center' }));
