@@ -2,7 +2,7 @@
 
 (() => {
   const STORAGE_KEY = 'studentSupportAnonymousBrowserId';
-  const ENDPOINT = '';
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzY3F6tz2Guy4A11VeK1GsmZsrR5z_RY2vmRDOxpo8Lcki0VI3S-21lGxozAECGObNc/exec';
 
   function createAnonymousBrowserId() {
     if (window.crypto?.randomUUID) return window.crypto.randomUUID();
