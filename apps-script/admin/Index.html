@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #222; background:#f6f7f8; }
+    * { box-sizing:border-box; }
+    body { margin:0; }
+    main { max-width:1180px; margin:0 auto; padding:32px 20px 56px; }
+    h1 { margin:0 0 8px; font-size:28px; }
+    .sub { margin:0 0 24px; color:#666; }
+    .filters { display:flex; flex-wrap:wrap; gap:12px; align-items:end; background:#fff; padding:16px; border-radius:14px; box-shadow:0 1px 4px #0001; }
+    label { display:grid; gap:6px; font-size:14px; font-weight:600; }
+    input, button { font:inherit; }
+    input[type=date] { padding:9px 10px; border:1px solid #ccc; border-radius:9px; }
+    button { padding:10px 14px; border:0; border-radius:9px; cursor:pointer; background:#24364b; color:#fff; }
+    button.secondary { background:#e9edf1; color:#24364b; }
+    .quick { display:flex; gap:8px; flex-wrap:wrap; }
+    .status { min-height:24px; margin:12px 2px; color:#666; }
+    .kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin:18px 0; }
+    .card, .panel { background:#fff; border-radius:14px; box-shadow:0 1px 4px #0001; }
+    .card { padding:18px; }
+    .card .label { color:#666; font-size:13px; }
+    .card .value { font-size:28px; font-weight:750; margin-top:8px; }
+    .grid { display:grid; grid-template-columns:1.2fr .8fr; gap:16px; }
+    .panel { padding:18px; overflow:hidden; }
+    .panel h2 { font-size:18px; margin:0 0 14px; }
+    .chart { display:flex; align-items:end; gap:6px; height:220px; border-bottom:1px solid #ddd; padding-top:12px; overflow-x:auto; }
+    .bar-wrap { min-width:34px; height:100%; display:flex; flex-direction:column; justify-content:end; align-items:center; gap:5px; }
+    .bar { width:22px; min-height:2px; background:#6d7f91; border-radius:5px 5px 0 0; }
+    .bar-label { font-size:10px; color:#777; writing-mode:vertical-rl; max-height:64px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th,td { padding:9px 8px; border-bottom:1px solid #eee; text-align:left; }
+    th:nth-child(3),th:nth-child(4),td:nth-child(3),td:nth-child(4) { text-align:right; }
+    .note { margin-top:16px; color:#777; font-size:13px; line-height:1.5; }
+    @media(max-width:800px){ .kpis{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<main>
+  <h1>心靈解籤所 3.0｜統計管理後台</h1>
+  <p class="sub">匿名使用統計。匿名瀏覽器數僅供估算，不代表真實人數。</p>
+
+  <section class="filters">
+    <label>開始日期<input id="start" type="date"></label>
+    <label>結束日期<input id="end" type="date"></label>
+    <button id="refresh">更新統計</button>
+    <div class="quick">
+      <button class="secondary" data-range="today">今天</button>
+      <button class="secondary" data-range="7">近 7 天</button>
+      <button class="secondary" data-range="30">近 30 天</button>
+      <button class="secondary" data-range="month">本月</button>
+    </div>
+  </section>
+
+  <div class="status" id="status"></div>
+
+  <section class="kpis">
+    <div class="card"><div class="label">總抽籤次數</div><div class="value" id="totalDraws">—</div></div>
+    <div class="card"><div class="label">匿名瀏覽器數</div><div class="value" id="uniqueBrowsers">—</div></div>
+    <div class="card"><div class="label">平均每瀏覽器抽籤次數</div><div class="value" id="averageDraws">—</div></div>
+    <div class="card"><div class="label">重複使用瀏覽器數</div><div class="value" id="repeatBrowsers">—</div></div>
+    <div class="card"><div class="label">重複使用比例</div><div class="value" id="repeatRate">—</div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>每日抽籤趨勢</h2>
+      <div class="chart" id="dailyChart"></div>
+    </div>
+
+    <div class="panel">
+      <h2>64 卦抽中排行</h2>
+      <div style="max-height:420px;overflow:auto">
+        <table>
+          <thead><tr><th>卦</th><th>卦名</th><th>次數</th><th>比例</th></tr></thead>
+          <tbody id="hexagramRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">匿名瀏覽器 ID 來自同一瀏覽器的 localStorage。換裝置、換瀏覽器、無痕模式或清除網站資料後可能產生新的 ID，因此只能用來估算重複使用情形。</p>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+  const toDateInput = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+
+  function setRange(kind) {
+    const end = new Date();
+    const start = new Date(end);
+    if (kind === 'today') {
+    } else if (kind === 'month') {
+      start.setDate(1);
+    } else {
+      start.setDate(start.getDate() - (Number(kind) - 1));
+    }
+    $('start').value = toDateInput(start);
+    $('end').value = toDateInput(end);
+    load();
+  }
+
+  function load() {
+    $('status').textContent = '讀取統計資料中…';
+    $('refresh').disabled = true;
+    google.script.run
+      .withSuccessHandler(render)
+      .withFailureHandler(err => {
+        $('status').textContent = err && err.message ? err.message : '讀取失敗。';
+        $('refresh').disabled = false;
+      })
+      .getDashboardData($('start').value, $('end').value);
+  }
+
+  function render(data) {
+    $('status').textContent = data.period.start + ' ～ ' + data.period.end;
+    $('refresh').disabled = false;
+
+    $('totalDraws').textContent = data.kpis.totalDraws.toLocaleString('zh-TW');
+    $('uniqueBrowsers').textContent = data.kpis.uniqueBrowsers.toLocaleString('zh-TW');
+    $('averageDraws').textContent = data.kpis.averageDraws.toFixed(2);
+    $('repeatBrowsers').textContent = data.kpis.repeatBrowsers.toLocaleString('zh-TW');
+    $('repeatRate').textContent = (data.kpis.repeatRate * 100).toFixed(1) + '%';
+
+    const max = Math.max(1, ...data.daily.map(x => x.count));
+    $('dailyChart').innerHTML = data.daily.length
+      ? data.daily.map(x => {
+          const h = Math.max(2, Math.round((x.count / max) * 150));
+          return '<div class="bar-wrap" title="' + x.date + '：' + x.count + ' 次">' +
+            '<strong>' + x.count + '</strong>' +
+            '<div class="bar" style="height:' + h + 'px"></div>' +
+            '<span class="bar-label">' + x.date.slice(5) + '</span></div>';
+        }).join('')
+      : '<p>此期間沒有抽籤資料。</p>';
+
+    $('hexagramRows').innerHTML = data.hexagrams.length
+      ? data.hexagrams.map(x => '<tr><td>' + escapeHtml(x.number) + '</td><td>' + escapeHtml(x.name) +
+          '</td><td>' + x.count + '</td><td>' + (x.rate * 100).toFixed(1) + '%</td></tr>').join('')
+      : '<tr><td colspan="4">此期間沒有資料。</td></tr>';
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  $('refresh').addEventListener('click', load);
+  document.querySelectorAll('[data-range]').forEach(btn => btn.addEventListener('click', () => setRange(btn.dataset.range)));
+
+  setRange('30');
+</script>
+</body>
+</html>
