@@ -298,3 +298,28 @@ button.button:disabled {
 .feedback-panel .button {
   margin-top: 0.25rem;
 }
+
+
+.feedback-form-wrap {
+  margin-top: 1rem;
+}
+
+.feedback-form-frame {
+  display: block;
+  width: 100%;
+  min-height: 980px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.feedback-form-fallback {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .feedback-form-frame {
+    min-height: 1120px;
+  }
+}
