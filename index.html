@@ -17,6 +17,7 @@
   <script src="js/hexagrams-8.js" defer></script>
   <script src="js/stats.js?v=20260928-1" defer></script>
   <script src="js/app.js?v=20260928-1" defer></script>
+  <script src="js/feedback-form.js?v=20260928-1" defer></script>
   <script src="js/reset-draw.js?v=20260823-1" defer></script>
 </head>
 <body>
@@ -103,8 +104,21 @@
               <li>想和老師一起看看這一卦可以怎麼理解</li>
             </ul>
             <p>都歡迎你留言給我們。</p>
-            <p><a class="button button-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSeNzy_IlYlNKGhLwyaO6wEowLRtbO03YXpksW04vsy4qphe_w/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer">我想留言</a></p>
+            <p>
+              <button class="button button-primary feedback-toggle" id="feedback-toggle" type="button" aria-expanded="false" aria-controls="feedback-form-wrap">我想留言</button>
+            </p>
             <p>如果你希望有人回應這段留言，也可以告訴我們「我想收到回覆」，我們會不定期透過你的學號信箱聯繫你。</p>
+            <div class="feedback-form-wrap" id="feedback-form-wrap" hidden>
+              <iframe
+                class="feedback-form-frame"
+                id="feedback-form-frame"
+                title="學生輔導中心留言表單"
+                src="https://docs.google.com/forms/d/e/1FAIpQLSeNzy_IlYlNKGhLwyaO6wEowLRtbO03YXpksW04vsy4qphe_w/viewform?embedded=true"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              >載入中…</iframe>
+              <p class="feedback-form-fallback">如果表單沒有正常顯示，<a href="https://docs.google.com/forms/d/e/1FAIpQLSeNzy_IlYlNKGhLwyaO6wEowLRtbO03YXpksW04vsy4qphe_w/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer">請改用新視窗填寫</a>。</p>
+            </div>
             <div class="feedback-reminder">
               <h4>小提醒</h4>
               <p>抽籤結果提供的是一個自我整理與反思的角度，<br>不代表對未來的預測，也不是唯一的答案。</p>
