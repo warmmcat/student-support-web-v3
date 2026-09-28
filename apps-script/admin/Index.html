@@ -32,7 +32,7 @@
     table { width:100%; border-collapse:collapse; font-size:14px; }
     th,td { padding:9px 8px; border-bottom:1px solid #eee; text-align:left; }
     th:nth-child(3),th:nth-child(4),td:nth-child(3),td:nth-child(4) { text-align:right; }
-    .note { margin-top:16px; color:#777; font-size:13px; line-height:1.5; }
+    .top-list{display:grid;gap:10px}.top-item{display:grid;grid-template-columns:110px 1fr 48px;gap:8px;align-items:center}.top-track{background:#eef1f4;height:18px;border-radius:999px;overflow:hidden}.top-fill{height:100%;background:#6d7f91}.top-count{text-align:right}.table-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.period{font-weight:700;color:#333;margin:0 2px 12px}.note { margin-top:16px; color:#777; font-size:13px; line-height:1.5; }
     @media(max-width:800px){ .kpis{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} }
   </style>
 </head>
@@ -44,7 +44,7 @@
   <section class="filters">
     <label>開始日期<input id="start" type="date"></label>
     <label>結束日期<input id="end" type="date"></label>
-    <button id="refresh">更新統計</button>
+    <button id="refresh">更新統計</button>\n    <button id="exportCsv" class="secondary">匯出 CSV</button>
     <div class="quick">
       <button class="secondary" data-range="today">今天</button>
       <button class="secondary" data-range="7">近 7 天</button>
@@ -53,7 +53,7 @@
     </div>
   </section>
 
-  <div class="status" id="status"></div>
+  <div class="status" id="status"></div>\n  <div class="period" id="period"></div>
 
   <section class="kpis">
     <div class="card"><div class="label">總抽籤次數</div><div class="value" id="totalDraws">—</div></div>
@@ -86,7 +86,7 @@
 <script>
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2,'0');
-  const toDateInput = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  const toDateInput = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());\n  let currentData = null;
 
   function setRange(kind) {
     const end = new Date();
@@ -115,7 +115,7 @@
   }
 
   function render(data) {
-    $('status').textContent = data.period.start + ' ～ ' + data.period.end;
+    currentData = data;\n    $('status').textContent = '統計資料已更新';\n    $('period').textContent = data.period.start + ' ～ ' + data.period.end;
     $('refresh').disabled = false;
 
     $('totalDraws').textContent = data.kpis.totalDraws.toLocaleString('zh-TW');
@@ -141,11 +141,48 @@
       : '<tr><td colspan="4">此期間沒有資料。</td></tr>';
   }
 
+  function renderTop10(hexagrams) {
+    const top = [...hexagrams].sort((a,b) => b.count - a.count || Number(a.number)-Number(b.number)).slice(0,10);
+    const max = Math.max(1, ...top.map(x => x.count));
+    $('topHexagrams').innerHTML = top.length ? top.map(x => '<div class="top-item"><div>第 '+escapeHtml(x.number)+' 卦 '+escapeHtml(x.name)+'</div><div class="top-track"><div class="top-fill" style="width:'+((x.count/max)*100).toFixed(1)+'%"></div></div><div class="top-count">'+x.count+'</div></div>').join('') : '<p>此期間沒有資料。</p>';
+  }
+
+  function renderTable() {
+    if (!currentData) return;
+    const mode = $('sortMode').value;
+    const rows = [...currentData.hexagrams];
+    rows.sort((a,b) => {
+      if (mode === 'count-asc') return a.count-b.count || Number(a.number)-Number(b.number);
+      if (mode === 'number-asc') return Number(a.number)-Number(b.number);
+      if (mode === 'number-desc') return Number(b.number)-Number(a.number);
+      if (mode === 'name-asc') return String(a.name).localeCompare(String(b.name),'zh-Hant');
+      return b.count-a.count || Number(a.number)-Number(b.number);
+    });
+    $('hexagramRows').innerHTML = rows.length ? rows.map(x => '<tr><td>'+escapeHtml(x.number)+'</td><td>'+escapeHtml(x.name)+'</td><td>'+x.count+'</td><td>'+(x.rate*100).toFixed(1)+'%</td></tr>').join('') : '<tr><td colspan="4">此期間沒有資料。</td></tr>';
+  }
+
+  function exportCsv() {
+    $('exportCsv').disabled = true;
+    google.script.run.withSuccessHandler(csv => {
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'student-support-' + $('start').value + '-to-' + $('end').value + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      $('exportCsv').disabled = false;
+    }).withFailureHandler(err => {
+      $('status').textContent = err?.message || 'CSV 匯出失敗。';
+      $('exportCsv').disabled = false;
+    }).getDashboardCsv($('start').value, $('end').value);
+  }
+
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  $('refresh').addEventListener('click', load);
+  $('refresh').addEventListener('click', load);\n  $('exportCsv').addEventListener('click', exportCsv);\n  $('sortMode').addEventListener('change', renderTable);
   document.querySelectorAll('[data-range]').forEach(btn => btn.addEventListener('click', () => setRange(btn.dataset.range)));
 
   setRange('30');
