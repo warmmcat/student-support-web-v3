@@ -11,6 +11,11 @@
   function setExpanded(toggle, wrap, expanded) {
     if (expanded) {
       wrap.removeAttribute('hidden');
+
+      const frame = wrap.querySelector('#feedback-form-frame');
+      if (frame && !frame.src && frame.dataset.src) {
+        frame.src = frame.dataset.src;
+      }
     } else {
       wrap.setAttribute('hidden', '');
     }
