@@ -2,6 +2,16 @@
 
 const feedbackToggle = document.querySelector('#feedback-toggle');
 const feedbackFormWrap = document.querySelector('#feedback-form-wrap');
+const feedbackFormFrame = document.querySelector('#feedback-form-frame');
+
+function loadFeedbackForm() {
+  if (!feedbackFormFrame || feedbackFormFrame.src) return;
+
+  const formUrl = feedbackFormFrame.dataset.src;
+  if (formUrl) {
+    feedbackFormFrame.src = formUrl;
+  }
+}
 
 if (feedbackToggle && feedbackFormWrap) {
   feedbackToggle.addEventListener('click', () => {
@@ -11,6 +21,7 @@ if (feedbackToggle && feedbackFormWrap) {
     feedbackToggle.textContent = willOpen ? '收合留言表單' : '我想留言';
 
     if (willOpen) {
+      loadFeedbackForm();
       window.requestAnimationFrame(() => {
         feedbackFormWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
