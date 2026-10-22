@@ -5,7 +5,7 @@ const feedbackFormWrap = document.querySelector('#feedback-form-wrap');
 const feedbackFormFrame = document.querySelector('#feedback-form-frame');
 
 function loadFeedbackForm() {
-  if (!feedbackFormFrame || feedbackFormFrame.src) return;
+  if (!feedbackFormFrame || feedbackFormFrame.hasAttribute('src')) return;
 
   const formUrl = feedbackFormFrame.dataset.src;
   if (formUrl) {
