@@ -115,18 +115,24 @@ function buildExportCard() {
   exportCard.hidden = false;
   exportCard.removeAttribute('id');
   exportCard.classList.add('share-export-card');
-  exportCard.querySelector('.result-actions')?.remove();
-  exportCard.querySelector('.share-tools')?.remove();
+
+  // Export only through the final "給同學的一句話" section.
+  // Everything after .result-sections (reminder, share tools, actions, feedback)
+  // is intentionally excluded from screenshots, PDFs, and shared images.
+  const resultSections = exportCard.querySelector('.result-sections');
+  if (resultSections) {
+    let nextElement = resultSections.nextElementSibling;
+    while (nextElement) {
+      const elementToRemove = nextElement;
+      nextElement = nextElement.nextElementSibling;
+      elementToRemove.remove();
+    }
+  }
 
   const brand = document.createElement('div');
   brand.className = 'share-export-brand';
-  brand.innerHTML = '<span aria-hidden="true">心</span><strong>臺北醫學大學學生輔導中心｜心靈解籤所</strong>';
+  brand.innerHTML = '<span aria-hidden="true">心</span><strong>臺北醫學大學學生輔導中心｜心靈卜卦所</strong>';
   exportCard.prepend(brand);
-
-  const footer = document.createElement('footer');
-  footer.className = 'share-export-footer';
-  footer.innerHTML = '<p>這是一段支持性的自我反思文字，不是預言，也不能取代心理諮商、醫療診斷或其他專業建議。</p><p>warmmcat.github.io/student-support-web-v2/</p>';
-  exportCard.append(footer);
 
   staging.append(exportCard);
   document.body.append(staging);
@@ -328,7 +334,7 @@ function shareResult() {
   setStatus('正在開啟分享面板…');
 
   const sharePromise = navigator.share({
-    title: '學生輔導中心｜心靈解籤所',
+    title: '學生輔導中心｜心靈卜卦所',
     files: [file]
   });
 
