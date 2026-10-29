@@ -11,7 +11,7 @@ v2Stylesheet.href = 'css/v2.css?v=20260823-2';
 document.head.append(v2Stylesheet);
 
 const shareModule = document.createElement('script');
-shareModule.src = 'js/share-result.js?v=20260823-6';
+shareModule.src = 'js/share-result.js?v=20261029-crop1';
 shareModule.defer = true;
 document.head.append(shareModule);
 
